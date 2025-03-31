@@ -1,6 +1,6 @@
 from modules import audio, video
 
-audio_path = "/home/lu/GDrive/UPLOAD/NEW/RACKS!/racks_mix_master.wav"
+audio_path = "test_song.wav"
 clips_path = [
     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl.gif",
     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl2.gif",
