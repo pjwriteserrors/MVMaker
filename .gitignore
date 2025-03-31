@@ -173,4 +173,6 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-test*
+test.py
+test.mp4
+test_song.wav
