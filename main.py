@@ -317,22 +317,22 @@ class App(ctk.CTk):
 
 
 def main():
-    # audio_window = AudioDropWindow()
-    # audio_window.mainloop()
-    # audio_path = audio_window.audio_file
-    # tempo = audio_window.tempo
-    # beat_times = audio_window.beat_times
-    # beat_intervals = audio_window.beat_intervals
+    audio_window = AudioDropWindow()
+    audio_window.mainloop()
+    audio_path = audio_window.audio_file
+    tempo = audio_window.tempo
+    beat_times = audio_window.beat_times
+    beat_intervals = audio_window.beat_intervals
 
-    # gif_window = GifDropWindow()
-    # gif_window.mainloop()
-    # gifs = gif_window.gif_paths
+    gif_window = GifDropWindow()
+    gif_window.mainloop()
+    gifs = gif_window.gif_paths
 
-    # main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path)
-    # main_window.mainloop()
-
-    main_window = App(3, [], [2, 3, 54, 6], [], "test_song.wav")
+    main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path)
     main_window.mainloop()
+
+    # main_window = App(3, [], [2, 3, 54, 6], [], "test_song.wav")
+    # main_window.mainloop()
 
 
 if __name__ == "__main__":
