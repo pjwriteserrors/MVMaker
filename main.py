@@ -9,6 +9,7 @@ import os
 import pygame
 from mutagen.mp3 import MP3
 import wave
+import shlex
 
 
 # audio_path = "test_song.wav"
@@ -62,6 +63,7 @@ class AudioDropWindow(TkinterDnD.Tk):
         )
         self.outline.pack(expand=1, fill="both", padx=30, pady=(30, 10))
 
+        # init the outline frame as drop target for dnd
         self.outline.drop_target_register(DND_FILES)
         self.outline.dnd_bind("<<Drop>>", self.drop_event)
 
@@ -76,6 +78,7 @@ class AudioDropWindow(TkinterDnD.Tk):
         self.drop_label.pack(expand=1)
 
     def click_event(self):
+        # openfile dialog if not dnd
         self.audio_file = filedialog.askopenfilename()
         if self.audio_file:
             self.start_audio_analysis(self.audio_file)
@@ -85,6 +88,7 @@ class AudioDropWindow(TkinterDnD.Tk):
         self.start_audio_analysis(self.audio_file)
 
     def start_audio_analysis(self, filepath):
+        # destroy stuff to make place for the label and progress bar
         self.audio_file_button.destroy()
         self.outline.destroy()
 
@@ -95,18 +99,22 @@ class AudioDropWindow(TkinterDnD.Tk):
         self.progress.pack(padx=30, pady=10)
         self.progress.start()
 
+        # new thread to start analizing audio
         threading.Thread(
             target=self.run_audio_analysis, args=(filepath,), daemon=True
         ).start()
 
     def run_audio_analysis(self, filepath):
         result = audio.get_intervals(filepath)
+
+        # after analizing is done, call function to get rid of everything and destroy the window
         self.after(0, self.analysis_finished, result)
 
     def analysis_finished(self, result):
         self.progress.stop()
         self.progress.destroy()
 
+        # results being saved into attributes
         self.tempo, self.beat_times, self.beat_intervals = result
 
         self.destroy()
@@ -128,6 +136,7 @@ class GifDropWindow(TkinterDnD.Tk):
         )
         self.outline.pack(expand=1, fill="both", padx=30, pady=(30, 10))
 
+        # init outline frame as drop target for dnd
         self.outline.drop_target_register(DND_FILES)
         self.outline.dnd_bind("<<Drop>>", self.drop_event)
 
@@ -137,18 +146,32 @@ class GifDropWindow(TkinterDnD.Tk):
         )
         self.audio_file_button.pack(fill="x", padx=30, pady=(0, 30))
 
+        self.confirm_button = ctk.CTkButton(
+            self, text="Roll with those", command=self.destroy
+        )
+
         # -- labels --
         self.drop_label = ctk.CTkLabel(self.outline, text="Drop your GIF files here")
         self.drop_label.pack(expand=1)
 
     def click_event(self):
         self.gif_paths = filedialog.askopenfilenames()
-        self.destroy()
+
+        for path in self.gif_paths:
+            ctk.CTkLabel(self.frame_1, text=path).pack()
+        self.confirm_button.pack()
 
     def drop_event(self, event):
-        files = event.data.split()
-        self.gif_paths = [f.strip("{}") for f in files]
-        self.destroy()
+        # handling file preparation cause dnd formats them weirdly
+        files = self.tk.splitlist(event.data)
+        new_paths = [f.strip("{}") for f in files]
+
+        self.gif_paths.extend(new_paths)
+
+        for path in self.gif_paths:
+            ctk.CTkLabel(self.frame_1, text=path).pack()
+            print(path) # debug printing
+        self.confirm_button.pack()
 
 
 class MusicPlayer(ctk.CTkFrame):
@@ -157,26 +180,26 @@ class MusicPlayer(ctk.CTkFrame):
         self.audio_file = audio_file
         self.duration = None
 
-        # Dauer der Audiodatei ermitteln
+        # get audio duration for wav and mp3
         ext = os.path.splitext(self.audio_file)[1].lower()
-        if ext == '.wav':
-            with wave.open(self.audio_file, 'rb') as wf:
+        if ext == ".wav":
+            with wave.open(self.audio_file, "rb") as wf:
                 frames = wf.getnframes()
                 rate = wf.getframerate()
                 self.duration = frames / float(rate)
-        elif ext == '.mp3':
+        elif ext == ".mp3":
             audio = MP3(self.audio_file)
             self.duration = audio.info.length
         else:
             raise ValueError("Unsupported file format")
 
-        # pygame mixer initialisieren
+        # init pygame mixer
         pygame.mixer.init()
         pygame.mixer.music.load(self.audio_file)
 
         self.is_playing = False
 
-        # Play- und Stop-Buttons
+        # -- button --
         self.play_button = ctk.CTkButton(
             self, text="", command=self.play, width=40, height=40
         )
@@ -186,16 +209,16 @@ class MusicPlayer(ctk.CTkFrame):
         )
         self.stop_button.pack(side="left", padx=5, pady=5)
 
-        # Progress-Slider: Maximum entspricht der Audiodauer
+        # -- sliders --
         self.progress_slider = ctk.CTkSlider(self, from_=0, to=self.duration)
         self.progress_slider.pack(side="left", fill="x", expand=True, padx=5, pady=5)
         self.progress_slider.set(0)
 
-        # Label zur Anzeige des Fortschritts (Start bei 0)
+        # -- labels --
         self.time_label = ctk.CTkLabel(self, text=self.format_time(0))
         self.time_label.pack(side="left", padx=5, pady=5)
 
-        # Starte den Update-Loop
+        # start loop
         self.update_progress()
 
     def play(self):
@@ -210,25 +233,24 @@ class MusicPlayer(ctk.CTkFrame):
 
     def update_progress(self):
         if self.is_playing:
-            current_pos = pygame.mixer.music.get_pos() / 1000.0  # in Sekunden
+            current_pos = pygame.mixer.music.get_pos() / 1000.0
 
-            # Falls get_pos() -1 liefert, hat der Song geendet
+            # if current_pos = -1, the song is over
             if current_pos < 0:
                 current_pos = self.duration
                 self.is_playing = False
 
-            # Setze Slider und Label auf den aktuellen Abspielstand
+            # set slider and label to current progress
             self.progress_slider.set(current_pos)
             self.time_label.configure(text=self.format_time(current_pos))
 
-        # Update alle 250 ms
+        # update every 250ms
         self.after(250, self.update_progress)
 
     def format_time(self, seconds):
         minutes = int(seconds // 60)
         sec = int(seconds % 60)
         return f"{minutes:02d}:{sec:02d}"
-
 
 
 class App(ctk.CTk):
@@ -281,7 +303,7 @@ class App(ctk.CTk):
         self.video_player = tkvideoplayer.TkinterVideo(self.video_frame)
         self.video_player.pack(expand=1, fill="both", padx=10, pady=10)
 
-        # -- Music player --
+        # -- music player --
         self.music_player_container = ctk.CTkFrame(self.music_frame)
         self.music_player_container.pack(fill="x", padx=10, pady=10)
 
