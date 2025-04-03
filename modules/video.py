@@ -5,14 +5,16 @@ import datetime
 import threading
 from . import tkvideoplayer
 import os
+import math
 
 
 class VideoPlayer(ctk.CTkFrame):
-    def __init__(self, parent, gifs, beat_intervals, audio_path, **kwargs):
+    def __init__(self, parent, gifs, beat_intervals, audio_path, duration, **kwargs):
         super().__init__(parent, **kwargs)
         self.gifs = gifs
         self.beat_intervals = beat_intervals
         self.audio_path = audio_path
+        self.duration = duration
 
         # generate all the widgets
         self.generate_preview_button = ctk.CTkButton(
@@ -77,7 +79,7 @@ class VideoPlayer(ctk.CTkFrame):
             os.remove(".temp.mp4")
 
         clips = prepare(self.gifs)
-        concatenated_video = concat_clips(clips, self.beat_intervals)
+        concatenated_video = concat_clips(clips, self.beat_intervals, self.duration)
         final_video = add_audio(concatenated_video, self.audio_path)
         final_video.write_videofile(".temp.mp4")
 
@@ -172,26 +174,30 @@ def prepare(gifs):
     return formatted_clips
 
 
-def calculate_required_gif_segments(beat_intervals, gif_list):
-    total_segments = len(beat_intervals)
-    num_gifs = len(gif_list)
-    repeats = math.ceil(total_segments / num_gifs)
-    return total_segments, repeats
-
-
-def concat_clips(clips, intervals):
-    total_segments, repeats = calculate_required_gif_segments(beat_intervals, gif_list)
-
+def concat_clips(clips, intervals, duration):
     shortened_clips = []
-    
-    for clip in clips:
-        for interval in intervals:
-            shortened_clip = clip.subclipped(end_time=interval)
+    current_time = 0
+    i = 0
 
+    # Solange die akkumulierte Zeit unter der gewünschten Gesamtdauer liegt...
+    while current_time < duration:
+        # Wähle das Intervall und den entsprechenden Clip (mithilfe von Modulo, falls weniger Clips vorhanden sind)
+        interval = intervals[i % len(intervals)]
+        clip = clips[i % len(clips)]
+        
+        # Bestimme, wie viel Zeit dieser Clip einnehmen soll:
+        # Falls das Intervall größer als der verbleibende Rest ist, nimm nur den Rest.
+        duration_to_use = min(interval, duration - current_time)
+        
+        # Schneide den Clip auf die benötigte Dauer zu.
+        shortened_clip = clip.subclipped(0, duration_to_use)
         shortened_clips.append(shortened_clip)
+        
+        # Aktualisiere die akkumulierte Zeit und gehe zur nächsten Iteration
+        current_time += duration_to_use
+        i += 1
 
     concatenated_video = concatenate_videoclips(shortened_clips)
-
     return concatenated_video
 
 

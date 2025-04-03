@@ -4,6 +4,7 @@ import pygame
 import wave
 import os
 import customtkinter as ctk
+import math
 
 
 class MusicPlayer(ctk.CTkFrame):
@@ -98,8 +99,27 @@ def get_intervals(audio_path):
     print("Calculating beat intervals...")
     beat_intervals = np.diff(np.array(beat_times))
 
+    print("Calculating duration...")
+    duration = librosa.get_duration(filename=audio_path)
+
+    print("Calculating total GIFs needed...")
+    gifs_for_beats = len(beat_times)
+
+    # calculate avg length of a beat
+    avg_interval = np.mean(beat_intervals) if len(beat_intervals) > 0 else 0
+
+    # remaining time after beat
+    remaining_time = duration - beat_times[-1]
+
+    # count additional gifs
+    additional_gifs = math.ceil(remaining_time / avg_interval) if avg_interval > 0 else 0
+
+    total_gifs = gifs_for_beats + additional_gifs
+
     print("BPM:", tempo)
     print("Beat Times:", beat_times)
     print("Beat Intervals:", beat_intervals)
+    print("Duration:", duration)
+    print("Total GIFs needed:", total_gifs)
 
-    return tempo, beat_times, beat_intervals
+    return tempo, beat_times, beat_intervals, duration, total_gifs

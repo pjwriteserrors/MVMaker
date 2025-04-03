@@ -53,6 +53,8 @@ class AudioDropWindow(TkinterDnD.Tk):
         self.beat_times = None
         self.beat_intervals = None
         self.audio_file = None
+        self.duration = None
+        self.total_gifs = None
 
         # -- frames --
         self.frame_1 = ctk.CTkFrame(self)
@@ -115,18 +117,19 @@ class AudioDropWindow(TkinterDnD.Tk):
         self.progress.destroy()
 
         # results being saved into attributes
-        self.tempo, self.beat_times, self.beat_intervals = result
+        self.tempo, self.beat_times, self.beat_intervals, self.duration, self.total_gifs = result
 
         self.destroy()
 
 
 class GifDropWindow(TkinterDnD.Tk):
-    def __init__(self, beat_times):
+    def __init__(self, beat_times, total_gifs):
         super().__init__()
         self.title("Import GIF files")
         self.geometry("500x800")
         self.gif_paths = []
         self.beat_times = beat_times
+        
 
         # -- frames --
         self.frame_1 = ctk.CTkFrame(self)
@@ -152,7 +155,10 @@ class GifDropWindow(TkinterDnD.Tk):
         )
 
         # -- labels --
-        self.drop_label = ctk.CTkLabel(self.outline, text=f"Drop your GIF files here\nTotal GIFs needed: {max(len(self.beat_times) - 1, 0)}")
+        self.drop_label = ctk.CTkLabel(
+            self.outline,
+            text=f"Drop your GIF files here\nTotal GIFs needed: {total_gifs}",
+        )
         self.drop_label.pack(expand=1)
 
     def click_event(self):
@@ -171,15 +177,12 @@ class GifDropWindow(TkinterDnD.Tk):
 
         for path in self.gif_paths:
             ctk.CTkLabel(self.frame_1, text=path).pack()
-            print(path) # debug printing
+            print(path)  # debug printing
         self.confirm_button.pack()
 
 
-
-
-
 class App(ctk.CTk):
-    def __init__(self, tempo, beat_times, beat_intervals, gifs: list, audio_path):
+    def __init__(self, tempo, beat_times, beat_intervals, gifs: list, audio_path, duration):
         super().__init__()
         self.geometry("800x1000")
         self.title("MVMAKER")
@@ -190,6 +193,7 @@ class App(ctk.CTk):
         self.number_of_intervals = len(beat_intervals)
         self.audio_path = audio_path
         self.gifs = gifs
+        self.duration = duration
 
         # -- Frames --
         self.video_frame = ctk.CTkFrame(self)
@@ -211,19 +215,24 @@ class App(ctk.CTk):
         self.generate_button.pack(padx=30, pady=10)
 
         # -- video player --
-        self.vid_player = video.VideoPlayer(self.video_frame, self.gifs, self.beat_intervals, self.audio_path)
+        self.vid_player = video.VideoPlayer(
+            self.video_frame, self.gifs, self.beat_intervals, self.audio_path, self.duration
+        )
         self.vid_player.pack(expand=1, fill="both")
 
         # -- music player --
         self.music_player_container = ctk.CTkFrame(self.music_frame)
         self.music_player_container.pack(fill="x", padx=10, pady=10)
 
-        self.music_player = audio.MusicPlayer(self.music_player_container, self.audio_path)
+        self.music_player = audio.MusicPlayer(
+            self.music_player_container, self.audio_path
+        )
         self.music_player.pack(fill="x")
 
     def generate(self):
         clips = video.prepare(self.gifs)
-        concatenated_video = video.concat_clips(clips, self.beat_intervals)
+        
+        concatenated_video = video.concat_clips(clips, self.beat_intervals, self.duration)
         final_video = video.add_audio(concatenated_video, self.audio_path)
 
         final_video.write_videofile("test.mp4")
@@ -236,12 +245,14 @@ def main():
     tempo = audio_window.tempo
     beat_times = audio_window.beat_times
     beat_intervals = audio_window.beat_intervals
+    duration = audio_window.duration
+    total_gifs = audio_window.total_gifs
 
-    gif_window = GifDropWindow(beat_times)
+    gif_window = GifDropWindow(beat_times, total_gifs)
     gif_window.mainloop()
     gifs = gif_window.gif_paths
 
-    main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path)
+    main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path, duration)
     main_window.mainloop()
 
     # main_window = App(3, [], [2, 3, 54, 6], [], "test_song.wav")
