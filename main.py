@@ -1,4 +1,4 @@
-from modules import audio, video
+from modules import audio, video, tkvideoplayer
 import customtkinter as ctk
 from customtkinter import filedialog
 import datetime
@@ -210,8 +210,8 @@ class App(ctk.CTk):
         self.generate_button.pack(padx=30, pady=10)
 
         # -- video player --
-        self.video_player = video.VideoPlayer(self.video_frame, "test.mp4")
-        self.video_player.pack(fill="both", expand=1)
+        self.vid_player = video.VideoPlayer(self.video_frame, "test.mp4")
+        self.vid_player.pack(expand=1, fill="both")
 
         # -- music player --
         self.music_player_container = ctk.CTkFrame(self.music_frame)
@@ -219,7 +219,6 @@ class App(ctk.CTk):
 
         self.music_player = audio.MusicPlayer(self.music_player_container, self.audio_path)
         self.music_player.pack(fill="x")
-
 
     def generate(self):
         clips = video.prepare(self.gifs)
