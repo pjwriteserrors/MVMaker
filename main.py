@@ -1,4 +1,4 @@
-from modules import audio, video, tkvideoplayer
+from modules import audio, video
 import customtkinter as ctk
 from customtkinter import filedialog
 import datetime
@@ -174,83 +174,7 @@ class GifDropWindow(TkinterDnD.Tk):
         self.confirm_button.pack()
 
 
-class MusicPlayer(ctk.CTkFrame):
-    def __init__(self, parent, audio_file, **kwargs):
-        super().__init__(parent, **kwargs)
-        self.audio_file = audio_file
-        self.duration = None
 
-        # get audio duration for wav and mp3
-        ext = os.path.splitext(self.audio_file)[1].lower()
-        if ext == ".wav":
-            with wave.open(self.audio_file, "rb") as wf:
-                frames = wf.getnframes()
-                rate = wf.getframerate()
-                self.duration = frames / float(rate)
-        elif ext == ".mp3":
-            audio = MP3(self.audio_file)
-            self.duration = audio.info.length
-        else:
-            raise ValueError("Unsupported file format")
-
-        # init pygame mixer
-        pygame.mixer.init()
-        pygame.mixer.music.load(self.audio_file)
-
-        self.is_playing = False
-
-        # -- button --
-        self.play_button = ctk.CTkButton(
-            self, text="", command=self.play, width=40, height=40
-        )
-        self.play_button.pack(side="left", padx=5, pady=5)
-        self.stop_button = ctk.CTkButton(
-            self, text="", command=self.stop, width=40, height=40
-        )
-        self.stop_button.pack(side="left", padx=5, pady=5)
-
-        # -- sliders --
-        self.progress_slider = ctk.CTkSlider(self, from_=0, to=self.duration)
-        self.progress_slider.pack(side="left", fill="x", expand=True, padx=5, pady=5)
-        self.progress_slider.set(0)
-
-        # -- labels --
-        self.time_label = ctk.CTkLabel(self, text=self.format_time(0))
-        self.time_label.pack(side="left", padx=5, pady=5)
-
-        # start loop
-        self.update_progress()
-
-    def play(self):
-        pygame.mixer.music.play()
-        self.is_playing = True
-
-    def stop(self):
-        pygame.mixer.music.stop()
-        self.is_playing = False
-        self.progress_slider.set(0)
-        self.time_label.configure(text=self.format_time(0))
-
-    def update_progress(self):
-        if self.is_playing:
-            current_pos = pygame.mixer.music.get_pos() / 1000.0
-
-            # if current_pos = -1, the song is over
-            if current_pos < 0:
-                current_pos = self.duration
-                self.is_playing = False
-
-            # set slider and label to current progress
-            self.progress_slider.set(current_pos)
-            self.time_label.configure(text=self.format_time(current_pos))
-
-        # update every 250ms
-        self.after(250, self.update_progress)
-
-    def format_time(self, seconds):
-        minutes = int(seconds // 60)
-        sec = int(seconds % 60)
-        return f"{minutes:02d}:{sec:02d}"
 
 
 class App(ctk.CTk):
@@ -280,55 +204,22 @@ class App(ctk.CTk):
         self.gif_frame.pack(expand=1, fill="both", padx=30)
 
         # -- buttons --
-        self.generate_preview_button = ctk.CTkButton(
-            self.video_frame,
-            text="Generate Preview Video",
-        )
-        self.generate_preview_button.pack(fill="x", padx=10, pady=10)
-
         self.generate_button = ctk.CTkButton(
             self, text="Generate Video", command=self.generate
         )
         self.generate_button.pack(padx=30, pady=10)
 
-        self.play_pause_video_button = ctk.CTkButton(
-            self.video_frame,
-            text="",
-            width=40,
-            height=40,
-        )
-        self.play_pause_video_button.pack(anchor="sw", side="left", padx=10, pady=10)
-
         # -- video player --
-        self.video_player = tkvideoplayer.TkinterVideo(self.video_frame)
-        self.video_player.pack(expand=1, fill="both", padx=10, pady=10)
+        self.video_player = video.VideoPlayer(self.video_frame, "test.mp4")
+        self.video_player.pack(fill="both", expand=1)
 
         # -- music player --
         self.music_player_container = ctk.CTkFrame(self.music_frame)
         self.music_player_container.pack(fill="x", padx=10, pady=10)
 
-        self.music_player = MusicPlayer(self.music_player_container, self.audio_path)
+        self.music_player = audio.MusicPlayer(self.music_player_container, self.audio_path)
         self.music_player.pack(fill="x")
 
-        # -- sliders --
-        self.progress_video_slider = ctk.CTkSlider(
-            self.video_frame,
-            orientation="horizontal",
-            width=100,
-            from_=0,
-            to=self.number_of_intervals,
-            number_of_steps=self.number_of_intervals,
-        )
-        self.progress_video_slider.pack(
-            anchor="sw", side="left", fill="x", expand=1, padx=(0, 10), pady=(0, 21)
-        )
-
-        # -- labels --
-        self.progress_value = ctk.IntVar(self)
-        self.progress_label = ctk.CTkLabel(
-            self.video_frame, text=str(datetime.timedelta(seconds=0))
-        )
-        self.progress_label.pack(anchor="sw", side="left", padx=(0, 10), pady=(0, 15))
 
     def generate(self):
         clips = video.prepare(self.gifs)
@@ -339,22 +230,22 @@ class App(ctk.CTk):
 
 
 def main():
-    audio_window = AudioDropWindow()
-    audio_window.mainloop()
-    audio_path = audio_window.audio_file
-    tempo = audio_window.tempo
-    beat_times = audio_window.beat_times
-    beat_intervals = audio_window.beat_intervals
+    # audio_window = AudioDropWindow()
+    # audio_window.mainloop()
+    # audio_path = audio_window.audio_file
+    # tempo = audio_window.tempo
+    # beat_times = audio_window.beat_times
+    # beat_intervals = audio_window.beat_intervals
 
-    gif_window = GifDropWindow()
-    gif_window.mainloop()
-    gifs = gif_window.gif_paths
+    # gif_window = GifDropWindow()
+    # gif_window.mainloop()
+    # gifs = gif_window.gif_paths
 
-    main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path)
-    main_window.mainloop()
-
-    # main_window = App(3, [], [2, 3, 54, 6], [], "test_song.wav")
+    # main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path)
     # main_window.mainloop()
+
+    main_window = App(3, [], [2, 3, 54, 6], [], "test_song.wav")
+    main_window.mainloop()
 
 
 if __name__ == "__main__":
