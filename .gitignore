@@ -174,5 +174,5 @@ cython_debug/
 .pypirc
 
 test.py
-test.mp4
+*.mp4
 test_song.wav
