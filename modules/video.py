@@ -6,6 +6,7 @@ import threading
 from . import tkvideoplayer
 import os
 import math
+from PIL import Image
 
 
 class VideoPlayer(ctk.CTkFrame):
@@ -174,31 +175,45 @@ def prepare(gifs):
     return formatted_clips
 
 
-def concat_clips(clips, intervals, duration):
+def concat_clips(clips, intervals, total_duration, clip_duration):
     shortened_clips = []
     current_time = 0
+    beat_index = 0  # Startposition in den Intervallen
     i = 0
 
-    # Solange die akkumulierte Zeit unter der gewünschten Gesamtdauer liegt...
-    while current_time < duration:
-        # Wähle das Intervall und den entsprechenden Clip (mithilfe von Modulo, falls weniger Clips vorhanden sind)
-        interval = intervals[i % len(intervals)]
+    while current_time < total_duration:
+        # Falls noch Intervalle vorhanden sind, verwende sie
+        if beat_index < len(intervals):
+            skip = clip_duration[i % len(clip_duration)]
+            num_intervals = skip + 1  # z.B.: 0 -> 1 Intervall, 1 -> 2 Intervalle, etc.
+            
+            # Wenn genügend Intervalle vorhanden sind
+            if beat_index + num_intervals <= len(intervals):
+                segment_duration = sum(intervals[beat_index:beat_index+num_intervals])
+            else:
+                # Wenn nicht mehr genug Intervalle da sind, nimm den Rest
+                segment_duration = sum(intervals[beat_index:])
+            beat_index += num_intervals
+        else:
+            # Keine Intervalle mehr vorhanden, also fülle den Rest der Zeit auf
+            segment_duration = total_duration - current_time
+        
+        # Überschreitet das Segment nicht die verbleibende Zeit?
+        duration_to_use = min(segment_duration, total_duration - current_time)
+        
+        # Wähle einen Clip aus, loope falls nötig
         clip = clips[i % len(clips)]
-        
-        # Bestimme, wie viel Zeit dieser Clip einnehmen soll:
-        # Falls das Intervall größer als der verbleibende Rest ist, nimm nur den Rest.
-        duration_to_use = min(interval, duration - current_time)
-        
-        # Schneide den Clip auf die benötigte Dauer zu.
         shortened_clip = clip.subclipped(0, duration_to_use)
         shortened_clips.append(shortened_clip)
         
-        # Aktualisiere die akkumulierte Zeit und gehe zur nächsten Iteration
         current_time += duration_to_use
         i += 1
 
     concatenated_video = concatenate_videoclips(shortened_clips)
     return concatenated_video
+
+
+
 
 
 def add_audio(clip, audio_path):
@@ -207,3 +222,15 @@ def add_audio(clip, audio_path):
     final_video = clip.with_audio(audioclip)
 
     return final_video
+
+class ThumbnailLabel(ctk.CTkLabel):
+    """
+    function to get labels with thumbnails of gif
+    """
+    def __init__(self, master, gif, size=(200, 200), *args, **kwargs):
+        # load gif and get thumbnail
+        img = Image.open(gif)
+        img.thumbnail(size)
+        self.thumbnail = ctk.CTkImage(img, size=size)
+        super().__init__(master, image=self.thumbnail, text="", *args, **kwargs)
+        # reference to self.thumbnail gets saved for gc to not throw away
