@@ -176,32 +176,27 @@ def prepare(gifs):
 
 
 def concat_clips(clips, intervals, total_duration, clip_duration):
+    # credit chatGPT
     shortened_clips = []
     current_time = 0
-    beat_index = 0  # Startposition in den Intervallen
+    beat_index = 0 
     i = 0
 
     while current_time < total_duration:
-        # Falls noch Intervalle vorhanden sind, verwende sie
         if beat_index < len(intervals):
             skip = clip_duration[i % len(clip_duration)]
-            num_intervals = skip + 1  # z.B.: 0 -> 1 Intervall, 1 -> 2 Intervalle, etc.
+            num_intervals = skip + 1 
             
-            # Wenn genügend Intervalle vorhanden sind
             if beat_index + num_intervals <= len(intervals):
                 segment_duration = sum(intervals[beat_index:beat_index+num_intervals])
             else:
-                # Wenn nicht mehr genug Intervalle da sind, nimm den Rest
                 segment_duration = sum(intervals[beat_index:])
             beat_index += num_intervals
         else:
-            # Keine Intervalle mehr vorhanden, also fülle den Rest der Zeit auf
             segment_duration = total_duration - current_time
         
-        # Überschreitet das Segment nicht die verbleibende Zeit?
         duration_to_use = min(segment_duration, total_duration - current_time)
         
-        # Wähle einen Clip aus, loope falls nötig
         clip = clips[i % len(clips)]
         shortened_clip = clip.subclipped(0, duration_to_use)
         shortened_clips.append(shortened_clip)
