@@ -13,28 +13,28 @@ import shlex
 
 
 # audio_path = "test_song.wav"
-clips_path = [
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl2.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl3.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl4.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl5.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl6.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl7.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/cute.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/download.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/ulzzang-aesthetic.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/d76296f3436d3000a775932a994515ef.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/6a02ccaab8a4653a97dcd895ce0a1e89.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/a30c97b0066e96dd76a2bc8817d0e27f.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/anime-black.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/ac43f908af0af80aa0d04eba17b20e33.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/b337ece7fdaf7b43ea90414604b2fe32.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/954a13b892968bbb0152404ded0546fa.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/fa06e7189384aa6cfacecd6285d83df9.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/c182c85da3fd30efd88377b00a904dfe.gif",
-    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/b039e3faf7cc027b06e61926c6d7c7e6.gif",
-]
+# clips_path = [
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl2.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl3.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl4.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl5.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl6.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl7.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/cute.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/download.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/ulzzang-aesthetic.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/d76296f3436d3000a775932a994515ef.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/6a02ccaab8a4653a97dcd895ce0a1e89.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/a30c97b0066e96dd76a2bc8817d0e27f.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/anime-black.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/ac43f908af0af80aa0d04eba17b20e33.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/b337ece7fdaf7b43ea90414604b2fe32.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/954a13b892968bbb0152404ded0546fa.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/fa06e7189384aa6cfacecd6285d83df9.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/c182c85da3fd30efd88377b00a904dfe.gif",
+#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/b039e3faf7cc027b06e61926c6d7c7e6.gif",
+# ]
 
 # tempo, beat_times, beat_intervals = audio.get_intervals(audio_path)
 # clips = video.prepare(clips_path)
@@ -281,26 +281,26 @@ class App(ctk.CTk):
 
 
 def main():
-    # audio_window = AudioDropWindow()
-    # audio_window.mainloop()
-    # audio_path = audio_window.audio_file
-    # tempo = audio_window.tempo
-    # beat_times = audio_window.beat_times
-    # beat_intervals = audio_window.beat_intervals
-    # duration = audio_window.duration
-    # total_gifs = audio_window.total_gifs
+    audio_window = AudioDropWindow()
+    audio_window.mainloop()
+    audio_path = audio_window.audio_file
+    tempo = audio_window.tempo
+    beat_times = audio_window.beat_times
+    beat_intervals = audio_window.beat_intervals
+    duration = audio_window.duration
+    total_gifs = audio_window.total_gifs
 
-    # gif_window = GifDropWindow(beat_times, total_gifs)
-    # gif_window.mainloop()
-    # gifs = gif_window.gif_paths
+    gif_window = GifDropWindow(beat_times, total_gifs)
+    gif_window.mainloop()
+    gifs = gif_window.gif_paths
 
-    # main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path, duration)
-    # main_window.mainloop()
-
-    main_window = App(
-        3, [], [2, 3, 54, 6], clips_path, "test_song.wav", 10
-    )
+    main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path, duration)
     main_window.mainloop()
+
+    # main_window = App(
+    #     3, [], [2, 3, 54, 6], clips_path, "test_song.wav", 10
+    # )
+    # main_window.mainloop()
 
 
 if __name__ == "__main__":
