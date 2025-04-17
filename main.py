@@ -248,6 +248,11 @@ class App(ctk.CTk):
         # show skip beat frame after music player
         self.skip_beat_frame.pack(expand=1, fill="both",padx=10)
 
+        # dropdown to skip beats for all clips
+        #! test this shit
+        self.all_beatskip_dropdown = ckt.CTkOptionMenu(self.skip_beat_frame, values=[str(i) for i in range(len(self.beat_intervals))], command=set_all_durations)
+        self.all_beatskip_dropdown.pack()
+
         # create pairs of thumbnail and dropdown
         for gif in self.gifs:
             self.pair_frame = ctk.CTkFrame(self.skip_beat_frame, corner_radius=0)
@@ -279,6 +284,12 @@ class App(ctk.CTk):
                     option_values.append(int(stuff.get()))
 
         return option_values
+
+    def set_all_durations(self, duration):
+        for widget in self.skip_beat_frame.winfo_children():
+            for stuff in widget.winfo_children():
+                if isinstance(stuff, ctk.CTkOptionMenu):
+                    stuff.set(duration)
 
 
 def main():
