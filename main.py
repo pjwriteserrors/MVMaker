@@ -49,6 +49,7 @@ class AudioDropWindow(TkinterDnD.Tk):
         super().__init__()
         self.title("Import Audio file")
         self.geometry("500x800")
+                
         self.tempo = None
         self.beat_times = None
         self.beat_intervals = None

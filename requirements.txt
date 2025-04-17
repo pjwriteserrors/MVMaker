@@ -1,0 +1,9 @@
+librosa
+numpy
+pygame
+customtkinter
+tkinterdnd2
+mutagen
+moviepy
+pillow
+av

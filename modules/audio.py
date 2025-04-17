@@ -100,7 +100,7 @@ def get_intervals(audio_path):
     beat_intervals = np.diff(np.array(beat_times))
 
     print("Calculating duration...")
-    duration = librosa.get_duration(filename=audio_path)
+    duration = librosa.get_duration(path=audio_path)
 
     print("Calculating total GIFs needed...")
     gifs_for_beats = len(beat_times)
