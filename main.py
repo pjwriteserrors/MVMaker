@@ -260,14 +260,14 @@ class App(ctk.CTk):
         self.thumb_label = ctk.CTkLabel(
             self.pair_frame, text="All Clips", width=160, height=160
         )
-        self.thumb_label.pack(expand=1)
+        self.thumb_label.pack(side="top", pady=(0,5))
 
         self.all_beatskip_dropdown = ctk.CTkOptionMenu(
             self.pair_frame,
             values=[str(i) for i in range(len(self.beat_intervals))],
             command=self.set_all_durations,
         )
-        self.all_beatskip_dropdown.pack(expand=1, pady=(5, 0))
+        self.all_beatskip_dropdown.pack(side="top", pady=(0,5), padx=5)
 
         # options dropdown for more variations
         self.pair_frame = ctk.CTkFrame(self.skip_beat_frame, corner_radius=0)
@@ -276,36 +276,42 @@ class App(ctk.CTk):
         self.thumb_label = ctk.CTkLabel(
             self.pair_frame, text="Cool options", width=160, height=160
         )
-        self.thumb_label.pack(expand=1)
+        self.thumb_label.pack(side="top", pady=(0,5))
 
         self.patterns_beatskip_dropdown = ctk.CTkOptionMenu(
             self.pair_frame,
             values=list(self.data),
             command=self.set_patterns,
         )
-        self.patterns_beatskip_dropdown.pack(expand=1, pady=(5, 0), side="left")
+        self.patterns_beatskip_dropdown.pack(side="left", anchor="n", padx=5, pady=(0,5))
 
         # save pattern button
-        self.save_pattern_button = ctk.CTkButton(self.pair_frame, text="Save current pattern", command=self.save_pattern)
-        self.save_pattern_button.pack(expand=1, side="left")
+        self.save_pattern_button = ctk.CTkButton(self.pair_frame, text="Save current pattern", command=self.get_save_pattern_name)
+        self.save_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
+
+        # entry for pattern name
+        self.pattern_name_entry = ctk.CTkEntry(self.pair_frame, placeholder_text="Name of the pattern")
+
+        # second button for final save
+        self.final_save_button = ctk.CTkButton(self.pair_frame, text="Save!", command=self.save_pattern)
 
         # create pairs of thumbnail and dropdown
         for gif in self.gifs:
             self.pair_frame = ctk.CTkFrame(self.skip_beat_frame, corner_radius=0)
             self.pair_frame.pack(
-                side="left", padx=5, pady=(0, 5), expand=1, fill="both"
+                side="left", padx=5, pady=(0, 5), fill="both"
             )
 
             self.thumb_label = video.ThumbnailLabel(
                 self.pair_frame, gif, size=(160, 160)
             )
-            self.thumb_label.pack(expand=1)
+            self.thumb_label.pack(side="top", pady=(0,5))
 
             self.beatskip_dropdown = ctk.CTkOptionMenu(
                 self.pair_frame,
                 values=[str(i) for i in range(len(self.beat_intervals))],
             )
-            self.beatskip_dropdown.pack(expand=1, pady=(5, 0))
+            self.beatskip_dropdown.pack(side="top", pady=(0,5), padx=5)
 
     def generate(self):
         clips = video.prepare(self.gifs)
@@ -377,20 +383,54 @@ class App(ctk.CTk):
             val = self.pattern[idx % len(self.pattern)]
             menu.set(val)
 
+    def get_save_pattern_name(self):
+        # hide save button and dropdown to make space
+        self.save_pattern_button.pack_forget()
+        self.patterns_beatskip_dropdown.pack_forget()
+        
+        # show entry for name
+        self.pattern_name_entry.pack(side="left", anchor="n", padx=5, pady=(0,5))
+        self.final_save_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
+        
+
     def save_pattern(self):
         # generate and save pattern
         pattern = self.generate_clip_durations()
-        self.data["test"] = pattern
+
+        # get name from entry
+        for widget in self.skip_beat_frame.winfo_children():
+            for stuff in widget.winfo_children():
+                if isinstance(stuff, ctk.CTkEntry):
+                    name = stuff.get()
+
+        if name:
+            self.data[name] = pattern
+        else:
+            self.data["temp saved"] = pattern
 
         # write pattern in file
         with open("options/patterns.json", "w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False, indent=2)
 
+
         # update dropdown
         current_values = list(self.patterns_beatskip_dropdown.cget("values"))
-        current_values.append("test")
+        current_values.append(name)
         self.patterns_beatskip_dropdown.configure(values=current_values)
 
+        # hide saving things & reset entry
+        self.pattern_name_entry.delete(0, "end")
+        self.pattern_name_entry.pack_forget()
+        self.final_save_button.pack_forget()
+
+        # show dropdown and initial save button
+        self.patterns_beatskip_dropdown.pack(side="left", anchor="n", padx=5, pady=(0,5))
+        self.save_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
+
+        # set dropdown to saved pattern
+        self.patterns_beatskip_dropdown.set(name)
+        
+        # show message that it saved for 1 sec
         self.save_pattern_button.configure(text="Saved!")
         self.save_pattern_button.after(1000, lambda: self.save_pattern_button.configure(text="Save current pattern"))
 
