@@ -10,31 +10,32 @@ import pygame
 from mutagen.mp3 import MP3
 import wave
 import shlex
+import json
 
 
-# audio_path = "test_song.wav"
-# clips_path = [
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl2.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl3.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl4.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl5.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl6.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl7.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/cute.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/download.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/ulzzang-aesthetic.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/d76296f3436d3000a775932a994515ef.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/6a02ccaab8a4653a97dcd895ce0a1e89.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/a30c97b0066e96dd76a2bc8817d0e27f.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/anime-black.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/ac43f908af0af80aa0d04eba17b20e33.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/b337ece7fdaf7b43ea90414604b2fe32.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/954a13b892968bbb0152404ded0546fa.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/fa06e7189384aa6cfacecd6285d83df9.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/c182c85da3fd30efd88377b00a904dfe.gif",
-#     "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/b039e3faf7cc027b06e61926c6d7c7e6.gif",
-# ]
+audio_path = "test_song.wav"
+clips_path = [
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl2.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl3.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl4.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl5.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl6.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/aestheticgirl7.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/cute.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/download.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/ulzzang-aesthetic.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/d76296f3436d3000a775932a994515ef.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/6a02ccaab8a4653a97dcd895ce0a1e89.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/a30c97b0066e96dd76a2bc8817d0e27f.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/anime-black.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/ac43f908af0af80aa0d04eba17b20e33.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/b337ece7fdaf7b43ea90414604b2fe32.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/954a13b892968bbb0152404ded0546fa.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/fa06e7189384aa6cfacecd6285d83df9.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/c182c85da3fd30efd88377b00a904dfe.gif",
+    "/mnt/EDrive/Music/Adobe/Premiere/Other-Videos/Pinterest/GRAVES/b039e3faf7cc027b06e61926c6d7c7e6.gif",
+]
 
 # tempo, beat_times, beat_intervals = audio.get_intervals(audio_path)
 # clips = video.prepare(clips_path)
@@ -49,7 +50,7 @@ class AudioDropWindow(TkinterDnD.Tk):
         super().__init__()
         self.title("Import Audio file")
         self.geometry("500x800")
-                
+
         self.tempo = None
         self.beat_times = None
         self.beat_intervals = None
@@ -216,6 +217,10 @@ class App(ctk.CTk):
         self.gif_frame.pack_propagate(False)
         self.gif_frame.pack(expand=1, fill="both", padx=30)
 
+        # load patterns
+        with open("options/patterns.json", "r", encoding="utf-8") as f:
+            self.data = json.load(f)
+
         self.skip_beat_frame = ctk.CTkScrollableFrame(
             self.music_frame, fg_color="transparent", orientation="horizontal"
         )
@@ -246,24 +251,57 @@ class App(ctk.CTk):
 
         # -- dropdowns --
         # show skip beat frame after music player
-        self.skip_beat_frame.pack(expand=1, fill="both",padx=10)
+        self.skip_beat_frame.pack(expand=1, fill="both", padx=10)
 
         # dropdown to skip beats for all clips
-        #! test this shit
-        self.all_beatskip_dropdown = ckt.CTkOptionMenu(self.skip_beat_frame, values=[str(i) for i in range(len(self.beat_intervals))], command=set_all_durations)
-        self.all_beatskip_dropdown.pack()
+        self.pair_frame = ctk.CTkFrame(self.skip_beat_frame, corner_radius=0)
+        self.pair_frame.pack(side="left", padx=5, pady=(0, 5), expand=1, fill="both")
+
+        self.thumb_label = ctk.CTkLabel(
+            self.pair_frame, text="All Clips", width=160, height=160
+        )
+        self.thumb_label.pack(expand=1)
+
+        self.all_beatskip_dropdown = ctk.CTkOptionMenu(
+            self.pair_frame,
+            values=[str(i) for i in range(len(self.beat_intervals))],
+            command=self.set_all_durations,
+        )
+        self.all_beatskip_dropdown.pack(expand=1, pady=(5, 0))
+
+        # options dropdown for more variations
+        self.pair_frame = ctk.CTkFrame(self.skip_beat_frame, corner_radius=0)
+        self.pair_frame.pack(side="left", padx=5, pady=(0, 5), expand=1, fill="both")
+
+        self.thumb_label = ctk.CTkLabel(
+            self.pair_frame, text="Cool options", width=160, height=160
+        )
+        self.thumb_label.pack(expand=1)
+
+        self.patterns_beatskip_dropdown = ctk.CTkOptionMenu(
+            self.pair_frame,
+            values=list(self.data),
+            command=self.set_patterns,
+        )
+        self.patterns_beatskip_dropdown.pack(expand=1, pady=(5, 0))
 
         # create pairs of thumbnail and dropdown
         for gif in self.gifs:
             self.pair_frame = ctk.CTkFrame(self.skip_beat_frame, corner_radius=0)
-            self.pair_frame.pack(side="left", padx=5, pady=(0, 5), expand=1, fill="both")
+            self.pair_frame.pack(
+                side="left", padx=5, pady=(0, 5), expand=1, fill="both"
+            )
 
-            self.thumb_label = video.ThumbnailLabel(self.pair_frame, gif, size=(160, 160))
+            self.thumb_label = video.ThumbnailLabel(
+                self.pair_frame, gif, size=(160, 160)
+            )
             self.thumb_label.pack(expand=1)
 
-            self.beatskip_dropdown = ctk.CTkOptionMenu(self.pair_frame, values=[str(i) for i in range(len(self.beat_intervals))])
+            self.beatskip_dropdown = ctk.CTkOptionMenu(
+                self.pair_frame,
+                values=[str(i) for i in range(len(self.beat_intervals))],
+            )
             self.beatskip_dropdown.pack(expand=1, pady=(5, 0))
-
 
     def generate(self):
         clips = video.prepare(self.gifs)
@@ -277,6 +315,7 @@ class App(ctk.CTk):
         final_video.write_videofile("test.mp4")
 
     def generate_clip_durations(self):
+        """This function isn't for setting values in dropdowns, it puts the values in a list for generation"""
         option_values = []
         for widget in self.skip_beat_frame.winfo_children():
             for stuff in widget.winfo_children():
@@ -291,28 +330,43 @@ class App(ctk.CTk):
                 if isinstance(stuff, ctk.CTkOptionMenu):
                     stuff.set(duration)
 
+    def set_patterns(self, option):
+        # get option menus
+        option_menus = [
+            child
+            for widget in self.skip_beat_frame.winfo_children()
+            for child in widget.winfo_children()
+            if isinstance(child, ctk.CTkOptionMenu)
+        ]
+
+        # get patterns out the options file we loaded at the start of App() with selected option
+        self.pattern = self.data.get(option, {})
+
+        # set pattern to option menus
+        for idx, menu in enumerate(option_menus):
+            val = self.pattern[idx % len(self.pattern)]
+            menu.set(val)
+
 
 def main():
-    audio_window = AudioDropWindow()
-    audio_window.mainloop()
-    audio_path = audio_window.audio_file
-    tempo = audio_window.tempo
-    beat_times = audio_window.beat_times
-    beat_intervals = audio_window.beat_intervals
-    duration = audio_window.duration
-    total_gifs = audio_window.total_gifs
+    # audio_window = AudioDropWindow()
+    # audio_window.mainloop()
+    # audio_path = audio_window.audio_file
+    # tempo = audio_window.tempo
+    # beat_times = audio_window.beat_times
+    # beat_intervals = audio_window.beat_intervals
+    # duration = audio_window.duration
+    # total_gifs = audio_window.total_gifs
 
-    gif_window = GifDropWindow(beat_times, total_gifs)
-    gif_window.mainloop()
-    gifs = gif_window.gif_paths
+    # gif_window = GifDropWindow(beat_times, total_gifs)
+    # gif_window.mainloop()
+    # gifs = gif_window.gif_paths
 
-    main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path, duration)
-    main_window.mainloop()
-
-    # main_window = App(
-    #     3, [], [2, 3, 54, 6], clips_path, "test_song.wav", 10
-    # )
+    # main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path, duration)
     # main_window.mainloop()
+
+    main_window = App(3, [], [2, 3, 54, 6], clips_path, "test_song.wav", 10)
+    main_window.mainloop()
 
 
 if __name__ == "__main__":
