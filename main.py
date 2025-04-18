@@ -323,7 +323,7 @@ class App(ctk.CTk):
                     continue
 
                 # skip settings drop downs
-                if menu in (
+                if stuff in (
                     self.all_beatskip_dropdown,
                     self.patterns_beatskip_dropdown,
                 ):
@@ -340,7 +340,7 @@ class App(ctk.CTk):
                     continue
 
                 # skip settings drop downs
-                if menu in (
+                if stuff in (
                     self.all_beatskip_dropdown,
                     self.patterns_beatskip_dropdown,
                 ):
@@ -349,20 +349,28 @@ class App(ctk.CTk):
                 stuff.set(duration)
 
     def set_patterns(self, option):
+        option_menus = []
         # get option menus
-        option_menus = [
-            child
-            for widget in self.skip_beat_frame.winfo_children()
-            for child in widget.winfo_children()
-            if isinstance(child, ctk.CTkOptionMenu)
-        ]
+        for widget in self.skip_beat_frame.winfo_children():
+            for stuff in widget.winfo_children():
+                if not isinstance(stuff, ctk.CTkOptionMenu):
+                    continue
+
+                # skip settings drop downs
+                if stuff in (
+                    self.all_beatskip_dropdown,
+                    self.patterns_beatskip_dropdown,
+                ):
+                    continue
+
+                option_menus.append(stuff)
 
         # get patterns out the options file we loaded at the start of App() with selected option
         self.pattern = self.data.get(option, {})
 
         # set pattern to option menus
         for idx, menu in enumerate(option_menus):
-            val = self.pattern[idx % len(self.pattern)] #! fix order of numbers
+            val = self.pattern[idx % len(self.pattern)]
             menu.set(val)
 
 
