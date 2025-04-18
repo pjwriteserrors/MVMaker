@@ -319,16 +319,34 @@ class App(ctk.CTk):
         option_values = []
         for widget in self.skip_beat_frame.winfo_children():
             for stuff in widget.winfo_children():
-                if isinstance(stuff, ctk.CTkOptionMenu):
-                    option_values.append(int(stuff.get()))
+                if not isinstance(stuff, ctk.CTkOptionMenu):
+                    continue
+
+                # skip settings drop downs
+                if menu in (
+                    self.all_beatskip_dropdown,
+                    self.patterns_beatskip_dropdown,
+                ):
+                    continue
+
+                option_values.append(int(stuff.get()))
 
         return option_values
 
     def set_all_durations(self, duration):
         for widget in self.skip_beat_frame.winfo_children():
             for stuff in widget.winfo_children():
-                if isinstance(stuff, ctk.CTkOptionMenu):
-                    stuff.set(duration)
+                if not isinstance(stuff, ctk.CTkOptionMenu):
+                    continue
+
+                # skip settings drop downs
+                if menu in (
+                    self.all_beatskip_dropdown,
+                    self.patterns_beatskip_dropdown,
+                ):
+                    continue
+
+                stuff.set(duration)
 
     def set_patterns(self, option):
         # get option menus
@@ -344,7 +362,7 @@ class App(ctk.CTk):
 
         # set pattern to option menus
         for idx, menu in enumerate(option_menus):
-            val = self.pattern[idx % len(self.pattern)]
+            val = self.pattern[idx % len(self.pattern)] #! fix order of numbers
             menu.set(val)
 
 
