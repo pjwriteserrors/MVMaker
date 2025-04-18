@@ -283,7 +283,11 @@ class App(ctk.CTk):
             values=list(self.data),
             command=self.set_patterns,
         )
-        self.patterns_beatskip_dropdown.pack(expand=1, pady=(5, 0))
+        self.patterns_beatskip_dropdown.pack(expand=1, pady=(5, 0), side="left")
+
+        # save pattern button
+        self.save_pattern_button = ctk.CTkButton(self.pair_frame, text="Save current pattern", command=self.save_pattern)
+        self.save_pattern_button.pack(expand=1, side="left")
 
         # create pairs of thumbnail and dropdown
         for gif in self.gifs:
@@ -372,6 +376,23 @@ class App(ctk.CTk):
         for idx, menu in enumerate(option_menus):
             val = self.pattern[idx % len(self.pattern)]
             menu.set(val)
+
+    def save_pattern(self):
+        # generate and save pattern
+        pattern = self.generate_clip_durations()
+        self.data["test"] = pattern
+
+        # write pattern in file
+        with open("options/patterns.json", "w", encoding="utf-8") as f:
+            json.dump(self.data, f, ensure_ascii=False, indent=2)
+
+        # update dropdown
+        current_values = list(self.patterns_beatskip_dropdown.cget("values"))
+        current_values.append("test")
+        self.patterns_beatskip_dropdown.configure(values=current_values)
+
+        self.save_pattern_button.configure(text="Saved!")
+        self.save_pattern_button.after(1000, lambda: self.save_pattern_button.configure(text="Save current pattern"))
 
 
 def main():
