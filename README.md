@@ -2,10 +2,10 @@
 A tool that automates the making of music videos
 
 # TODO
-- [ ] delete patterns
+- [x] delete patterns
 - [ ] add more gifs (bottom frame)
 - [ ] add other musicpy effects (under beatskip dropdowns)
-- [ ] add new "settings" frame for all beatskips, patterns and preset musicpy effects
+- [x] add new "settings" frame for all beatskips, patterns and preset musicpy effects
 - [ ] say how many gifs are too much
 <br />
 
@@ -17,14 +17,14 @@ A tool that automates the making of music videos
 - [ ] conversion to gif
 <br />
 
-- [ ] get rid of preview button
-- [ ] make generate async
+- [x] get rid of preview button
+- [x] make generate async
 - [ ] make progress bar for generation
-- [ ] make button to save video to specific file (otherwise be temporary (delete after quit))
-- [ ] make quicksave button to save to project dir
+- [x] make button to save video to specific file (otherwise be temporary (delete after quit))
+- [x] make quicksave button to save to project dir
 <br />
 
-- [ ] show ouput video in video player
+- [x] show ouput video in video player
 - [ ] fix audio
 <br />
 

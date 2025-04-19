@@ -193,7 +193,7 @@ class App(ctk.CTk):
         self, tempo, beat_times, beat_intervals, gifs: list, audio_path, duration
     ):
         super().__init__()
-        self.geometry("800x1000")
+        self.attributes("-zoomed", True)
         self.title("MVMAKER")
 
         self.tempo = tempo
@@ -205,17 +205,25 @@ class App(ctk.CTk):
         self.duration = duration
 
         # -- Frames --
-        self.video_frame = ctk.CTkFrame(self)
+        self.video_frame = ctk.CTkFrame(self, width=550)
         self.video_frame.pack_propagate(False)
-        self.video_frame.pack(expand=1, fill="both", padx=30, pady=30)
+        self.video_frame.pack(fill="both", pady=30, padx=(5, 30), side="right")
 
-        self.music_frame = ctk.CTkFrame(self)
+        self.left_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.left_frame.pack_propagate(False)
+        self.left_frame.pack(side="left", fill="both", expand=1)
+
+        self.music_frame = ctk.CTkFrame(self.left_frame, height=300)
         self.music_frame.pack_propagate(False)
-        self.music_frame.pack(expand=1, fill="both", padx=30, pady=(0, 30))
+        self.music_frame.pack(side="top", fill="both", padx=(30, 5), pady=(30, 5))
 
-        self.gif_frame = ctk.CTkFrame(self)
+        self.fx_frame = ctk.CTkFrame(self.left_frame)
+        self.fx_frame.pack_propagate(False)
+        self.fx_frame.pack(side="left", padx=(30, 5), pady=(5, 30), fill="both", expand=1)
+
+        self.gif_frame = ctk.CTkFrame(self.left_frame)
         self.gif_frame.pack_propagate(False)
-        self.gif_frame.pack(expand=1, fill="both", padx=30)
+        self.gif_frame.pack(side="left", padx=(5, 5), pady=(5, 30), fill="both", expand=1)
 
         # load patterns
         with open("options/patterns.json", "r", encoding="utf-8") as f:
@@ -225,13 +233,14 @@ class App(ctk.CTk):
             self.music_frame, fg_color="transparent", orientation="horizontal"
         )
 
-        # -- buttons --
-        self.generate_button = ctk.CTkButton(
-            self, text="Generate Video", command=self.generate
-        )
-        self.generate_button.pack(padx=30, pady=10)
-
         # -- video player --
+        self.generate_button = ctk.CTkButton(
+            self.video_frame,
+            text="Generate Video",
+            command=self.generate_button_click,
+        )
+        self.generate_button.pack(fill="x", padx=10, pady=10)
+
         self.vid_player = video.VideoPlayer(
             self.video_frame,
             self.gifs,
@@ -286,8 +295,12 @@ class App(ctk.CTk):
         self.patterns_beatskip_dropdown.pack(side="left", anchor="n", padx=5, pady=(0,5))
 
         # save pattern button
-        self.save_pattern_button = ctk.CTkButton(self.pair_frame, text="Save current pattern", command=self.get_save_pattern_name)
+        self.save_pattern_button = ctk.CTkButton(self.pair_frame, text="Save pattern", command=self.get_save_pattern_name, width=70)
         self.save_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
+
+        self.delete_pattern_button = ctk.CTkButton(self.pair_frame, text="Delete pattern", command=self.delete_pattern, width=70)
+        self.delete_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
+
 
         # entry for pattern name
         self.pattern_name_entry = ctk.CTkEntry(self.pair_frame, placeholder_text="Name of the pattern")
@@ -313,16 +326,41 @@ class App(ctk.CTk):
             )
             self.beatskip_dropdown.pack(side="top", pady=(0,5), padx=5)
 
-    def generate(self):
+    def generate_button_click(self):
+        # 1. ask for filename
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".mp4",
+            filetypes=[("MP4", "*.mp4")])
+        if not file_path:
+            return
+
+        # 2. deactivate button and start new thread for generation
+        self.generate_button.configure(state="disabled")
+        threading.Thread(
+            target=self.generate,
+            args=(file_path,),
+            daemon=True
+        ).start()
+
+    def generate(self, file_path):
+        # 3. generate video
         clips = video.prepare(self.gifs)
-        clip_durations = self.generate_clip_durations()
-
-        concatenated_video = video.concat_clips(
-            clips, self.beat_intervals, self.duration, clip_durations
+        concatenated = video.concat_clips(
+            clips,
+            self.beat_intervals,
+            self.duration,
+            self.generate_clip_durations()
         )
-        final_video = video.add_audio(concatenated_video, self.audio_path)
+        final_video = video.add_audio(concatenated, self.audio_path)
+        final_video.write_videofile(file_path)
 
-        final_video.write_videofile("test.mp4")
+        # 4. set instance attribute and open video player
+        def on_done():
+            self.vid_player.video_file = file_path
+            self.vid_player.open_video()
+            self.generate_button.configure(state="normal")
+        self.after(0, on_done)
+
 
     def generate_clip_durations(self):
         """This function isn't for setting values in dropdowns, it puts the values in a list for generation"""
@@ -384,9 +422,10 @@ class App(ctk.CTk):
             menu.set(val)
 
     def get_save_pattern_name(self):
-        # hide save button and dropdown to make space
+        # hide save button and dropdown and delete button to make space
         self.save_pattern_button.pack_forget()
         self.patterns_beatskip_dropdown.pack_forget()
+        self.delete_pattern_button.pack_forget()
         
         # show entry for name
         self.pattern_name_entry.pack(side="left", anchor="n", padx=5, pady=(0,5))
@@ -410,7 +449,7 @@ class App(ctk.CTk):
 
         # write pattern in file
         with open("options/patterns.json", "w", encoding="utf-8") as f:
-            json.dump(self.data, f, ensure_ascii=False, indent=2)
+            json.dump(self.data, f, ensure_ascii=False, indent=4)
 
 
         # update dropdown
@@ -426,13 +465,38 @@ class App(ctk.CTk):
         # show dropdown and initial save button
         self.patterns_beatskip_dropdown.pack(side="left", anchor="n", padx=5, pady=(0,5))
         self.save_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
+        self.delete_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
 
         # set dropdown to saved pattern
         self.patterns_beatskip_dropdown.set(name)
         
         # show message that it saved for 1 sec
         self.save_pattern_button.configure(text="Saved!")
-        self.save_pattern_button.after(1000, lambda: self.save_pattern_button.configure(text="Save current pattern"))
+        self.save_pattern_button.after(1000, lambda: self.save_pattern_button.configure(text="Save pattern"))
+
+    def delete_pattern(self):
+        # get pattern to delete
+        name = self.patterns_beatskip_dropdown.get()
+
+        if name in self.data:
+            self.data.pop(name)
+
+        with open("options/patterns.json", "w", encoding="utf-8") as f:
+            json.dump(self.data, f, indent=4, ensure_ascii=False)
+
+        # update dropdown
+        current_values = list(self.patterns_beatskip_dropdown.cget("values"))
+        current_values.append(name)
+        self.patterns_beatskip_dropdown.configure(values=current_values)
+
+         # set dropdown to default pattern
+        self.patterns_beatskip_dropdown.set("default")
+
+        # update button text
+        self.delete_pattern_button.configure(text="Deleted!")
+        self.delete_pattern_button.after(1000, lambda: self.delete_pattern_button.configure(text="Delete pattern"))
+
+
 
 
 def main():
