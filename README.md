@@ -31,3 +31,6 @@ A tool that automates the making of music videos
 - [ ] add drag feature to audio player
 - [ ] add pause feature to audio player
 - [ ] combine pause and play button
+<br />
+
+- [ ] pinterest gif downloader
