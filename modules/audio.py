@@ -5,6 +5,7 @@ import wave
 import os
 import customtkinter as ctk
 import math
+from mutagen.mp3 import MP3
 
 
 class MusicPlayer(ctk.CTkFrame):
@@ -25,10 +26,6 @@ class MusicPlayer(ctk.CTkFrame):
             self.duration = audio.info.length
         else:
             raise ValueError("Unsupported file format")
-
-        # init pygame mixer
-        pygame.mixer.init()
-        pygame.mixer.music.load(self.audio_file)
 
         self.is_playing = False
 

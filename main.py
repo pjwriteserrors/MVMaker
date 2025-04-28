@@ -204,6 +204,11 @@ class App(ctk.CTk):
         self.gifs = gifs
         self.duration = duration
 
+        # init pygame mixer
+        pygame.init()
+        pygame.mixer.init()
+        pygame.mixer.music.load(self.audio_path)
+
         # -- Frames --
         self.video_frame = ctk.CTkFrame(self, width=550)
         self.video_frame.pack_propagate(False)
@@ -500,24 +505,24 @@ class App(ctk.CTk):
 
 
 def main():
-    # audio_window = AudioDropWindow()
-    # audio_window.mainloop()
-    # audio_path = audio_window.audio_file
-    # tempo = audio_window.tempo
-    # beat_times = audio_window.beat_times
-    # beat_intervals = audio_window.beat_intervals
-    # duration = audio_window.duration
-    # total_gifs = audio_window.total_gifs
+    audio_window = AudioDropWindow()
+    audio_window.mainloop()
+    audio_path = audio_window.audio_file
+    tempo = audio_window.tempo
+    beat_times = audio_window.beat_times
+    beat_intervals = audio_window.beat_intervals
+    duration = audio_window.duration
+    total_gifs = audio_window.total_gifs
 
-    # gif_window = GifDropWindow(beat_times, total_gifs)
-    # gif_window.mainloop()
-    # gifs = gif_window.gif_paths
+    gif_window = GifDropWindow(beat_times, total_gifs)
+    gif_window.mainloop()
+    gifs = gif_window.gif_paths
 
-    # main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path, duration)
-    # main_window.mainloop()
-
-    main_window = App(3, [], [2, 3, 54, 6], clips_path, "test_song.wav", 10)
+    main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path, duration)
     main_window.mainloop()
+
+    # main_window = App(3, [], [2, 3, 54, 6], clips_path, "test_song.wav", 10)
+    # main_window.mainloop()
 
 
 if __name__ == "__main__":

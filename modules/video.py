@@ -1,5 +1,6 @@
 from moviepy import VideoFileClip, concatenate_videoclips, AudioFileClip, vfx
 from moviepy.video.fx.Crop import Crop
+from moviepy.video.fx.Loop import Loop 
 import customtkinter as ctk
 from customtkinter import filedialog
 import datetime
@@ -8,6 +9,7 @@ from . import tkvideoplayer
 import os
 import math
 from PIL import Image
+import pygame
 
 
 class VideoPlayer(ctk.CTkFrame):
@@ -66,19 +68,14 @@ class VideoPlayer(ctk.CTkFrame):
         self.vid_player.bind("<<SecondChanged>>", self.update_scale)
         self.vid_player.bind("<<Ended>>", self.video_ended)
 
-
-    
-
     def open_video(self):
         self.play_pause_video_button.configure(state="normal")
-
         self.vid_player.stop()
-        if self.video_file:
 
+        if self.video_file:
+            # load video
             self.vid_player.load(self.video_file)
-            self.vid_player.play()
             self.progress_slider.set(-1)
-            self.play_pause_video_button.configure(text="")
 
     def update_duration(self, event):
         try:
@@ -117,15 +114,18 @@ class VideoPlayer(ctk.CTkFrame):
         if self.video_file:
             if self.vid_player.is_paused():
                 self.vid_player.play()
+                pygame.mixer.music.unpause()
                 self.play_pause_video_button.configure(text="")
 
             else:
                 self.vid_player.pause()
+                pygame.mixer.music.pause()
                 self.play_pause_video_button.configure(text="")
 
     def video_ended(self, event):
         self.play_pause_video_button.configure(text="")
         self.progress_slider.set(-1)
+        pygame.mixer.music.stop()
 
 
 def prepare(gifs):
@@ -155,21 +155,18 @@ def prepare(gifs):
 
 
 def concat_clips(clips, intervals, total_duration, clip_duration):
-    # credit chatGPT
     shortened_clips = []
     current_time = 0
     beat_index = 0
     i = 0
 
     while current_time < total_duration:
+        # 1) calculate how long next clip is shown
         if beat_index < len(intervals):
             skip = clip_duration[i % len(clip_duration)]
             num_intervals = skip + 1
-
             if beat_index + num_intervals <= len(intervals):
-                segment_duration = sum(
-                    intervals[beat_index : beat_index + num_intervals]
-                )
+                segment_duration = sum(intervals[beat_index : beat_index + num_intervals])
             else:
                 segment_duration = sum(intervals[beat_index:])
             beat_index += num_intervals
@@ -178,15 +175,23 @@ def concat_clips(clips, intervals, total_duration, clip_duration):
 
         duration_to_use = min(segment_duration, total_duration - current_time)
 
+        # 2) pull clip from list
         clip = clips[i % len(clips)]
-        shortened_clip = clip.subclipped(0, duration_to_use)
-        shortened_clips.append(shortened_clip)
+
+        # 3) if clip is shorter than duration, loop, otherwise subclip
+        if clip.duration >= duration_to_use:
+            part = clip.subclipped(0, duration_to_use)
+        else:
+            looper = Loop(duration=duration_to_use)
+            part = looper.apply(clip)
+
+        shortened_clips.append(part)
 
         current_time += duration_to_use
         i += 1
 
-    concatenated_video = concatenate_videoclips(shortened_clips)
-    return concatenated_video
+    return concatenate_videoclips(shortened_clips)
+
 
 
 def add_audio(clip, audio_path):
