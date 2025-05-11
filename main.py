@@ -189,9 +189,7 @@ class AudioDropWindow(TkinterDnD.Tk):
 
 
 class App(ctk.CTk):
-    def __init__(
-        self, tempo, beat_times, beat_intervals, audio_path, duration
-    ):
+    def __init__(self, tempo, beat_times, beat_intervals, audio_path, duration, total_gifs):
         super().__init__()
         self.attributes("-zoomed", True)
         self.title("MVMAKER")
@@ -203,6 +201,7 @@ class App(ctk.CTk):
         self.audio_path = audio_path
         self.gifs = []
         self.duration = duration
+        self.total_gifs = total_gifs
 
         # init pygame mixer
         pygame.init()
@@ -234,11 +233,24 @@ class App(ctk.CTk):
             side="left", padx=(5, 5), pady=(5, 30), fill="both", expand=1
         )
 
-        # -- gif import button --
+        # -- Buttons --
         self.gif_import_button = ctk.CTkButton(
-            self.video_frame, text="Import your GIFs", command=self.choose_gifs
+            self.gif_frame, text="Import your GIFs", command=self.choose_gifs
         )
         self.gif_import_button.pack()
+
+        self.generate_button = ctk.CTkButton(
+            self.gif_frame,
+            text="Generate Video",
+            command=self.generate_button_click,
+            state="disabled",
+        )
+        self.generate_button.pack(fill="x", padx=10, pady=10)
+
+        self.pinterest_random_gifs_button = ctk.CTkButton(
+            self.video_frame, text="Feelin' Lucky", command=self.get_pinterest_gifs
+        )
+        self.pinterest_random_gifs_button.pack()
 
         # load patterns
         with open("options/patterns.json", "r", encoding="utf-8") as f:
@@ -247,13 +259,6 @@ class App(ctk.CTk):
         self.skip_beat_frame = ctk.CTkScrollableFrame(
             self.music_frame, fg_color="transparent", orientation="horizontal"
         )
-
-        self.generate_button = ctk.CTkButton(
-            self.music_frame,
-            text="Generate Video",
-            command=self.generate_button_click,
-        )
-        self.generate_button.pack(fill="x", padx=10, pady=10)
 
         # -- music player --
         self.music_player_container = ctk.CTkFrame(self.music_frame)
@@ -328,10 +333,6 @@ class App(ctk.CTk):
             self.pair_frame, text="Save!", command=self.save_pattern
         )
 
-        # initial load
-        self.hot_load(self.gifs)
-
-
     def hot_load(self, gifs):
         # create pairs of thumbnail and dropdown
         for gif in gifs:
@@ -351,12 +352,18 @@ class App(ctk.CTk):
 
     def choose_gifs(self):
         gif_paths = filedialog.askopenfilenames()
-        
+
         if gif_paths:
             self.gifs.extend(gif_paths)
             self.hot_load(gif_paths)
+            self.generate_button.configure(state="normal")
         else:
             pass
+
+    def get_pinterest_gifs(self):
+        
+
+        self.hot_load(paths)
 
     def generate_button_click(self):
         # 1. ask for filename
@@ -538,7 +545,7 @@ def main():
     # gif_window.mainloop()
     # gifs = gif_window.gif_paths
 
-    main_window = App(tempo, beat_times, beat_intervals, audio_path, duration)
+    main_window = App(tempo, beat_times, beat_intervals, audio_path, duration, total_gifs)
     main_window.mainloop()
 
     # main_window = App(3, [], [2, 3, 54, 6], clips_path, "test_song.wav", 10)

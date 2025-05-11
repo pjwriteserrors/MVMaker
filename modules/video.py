@@ -1,6 +1,6 @@
 from moviepy import VideoFileClip, concatenate_videoclips, AudioFileClip, vfx
 from moviepy.video.fx.Crop import Crop
-from moviepy.video.fx.Loop import Loop 
+from moviepy.video.fx.Loop import Loop
 import customtkinter as ctk
 from customtkinter import filedialog
 import datetime
@@ -166,7 +166,9 @@ def concat_clips(clips, intervals, total_duration, clip_duration):
             skip = clip_duration[i % len(clip_duration)]
             num_intervals = skip + 1
             if beat_index + num_intervals <= len(intervals):
-                segment_duration = sum(intervals[beat_index : beat_index + num_intervals])
+                segment_duration = sum(
+                    intervals[beat_index : beat_index + num_intervals]
+                )
             else:
                 segment_duration = sum(intervals[beat_index:])
             beat_index += num_intervals
@@ -193,13 +195,13 @@ def concat_clips(clips, intervals, total_duration, clip_duration):
     return concatenate_videoclips(shortened_clips)
 
 
-
 def add_audio(clip, audio_path):
     audioclip = AudioFileClip(audio_path)
 
     final_video = clip.with_audio(audioclip)
 
     return final_video
+
 
 
 class ThumbnailLabel(ctk.CTkLabel):
