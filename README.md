@@ -3,10 +3,9 @@ A tool that automates the making of music videos
 
 # TODO
 - [x] delete patterns
-- [ ] add more gifs (bottom frame)
+- [x] add more gifs (bottom frame)
 - [ ] add other musicpy effects (under beatskip dropdowns)
 - [x] add new "settings" frame for all beatskips, patterns and preset musicpy effects
-- [ ] say how many gifs are too much
 <br />
 
 - [ ] list gif files in a scrollable frame in dropdown window
@@ -24,13 +23,11 @@ A tool that automates the making of music videos
 - [x] make quicksave button to save to project dir
 <br />
 
-- [x] show ouput video in video player
-- [ ] fix audio
-<br />
-
 - [ ] add drag feature to audio player
 - [ ] add pause feature to audio player
 - [ ] combine pause and play button
 <br />
 
 - [ ] pinterest gif downloader
+- [ ] youtube video downloader
+- [ ] video detect cuts and make clips
