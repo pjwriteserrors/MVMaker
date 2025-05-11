@@ -12,120 +12,120 @@ from PIL import Image
 import pygame
 
 
-class VideoPlayer(ctk.CTkFrame):
-    def __init__(self, parent, gifs, beat_intervals, audio_path, duration, **kwargs):
-        super().__init__(parent, fg_color="transparent", **kwargs)
-        self.gifs = gifs
-        self.beat_intervals = beat_intervals
-        self.audio_path = audio_path
-        self.duration = duration
-        self.video_file = None
+# class VideoPlayer(ctk.CTkFrame):
+#     def __init__(self, parent, gifs, beat_intervals, audio_path, duration, **kwargs):
+#         super().__init__(parent, fg_color="transparent", **kwargs)
+#         self.gifs = gifs
+#         self.beat_intervals = beat_intervals
+#         self.audio_path = audio_path
+#         self.duration = duration
+#         self.video_file = None
 
-        # generate all the widgets
-        self.vid_player = tkvideoplayer.TkinterVideo(
-            scaled=True,
-            master=self,
-            keep_aspect=True,
-            consistant_frame_rate=True,
-            bg="black",
-        )
-        self.vid_player.pack(expand=True, fill="both", padx=10)
+#         # generate all the widgets
+#         self.vid_player = tkvideoplayer.TkinterVideo(
+#             scaled=True,
+#             master=self,
+#             keep_aspect=True,
+#             consistant_frame_rate=True,
+#             bg="black",
+#         )
+#         self.vid_player.pack(expand=True, fill="both", padx=10)
 
-        self.play_pause_video_button = ctk.CTkButton(
-            self,
-            text="",
-            width=40,
-            height=40,
-            command=self.play_pause,
-            state="disabled",
-        )
-        self.play_pause_video_button.pack(anchor="sw", side="left", padx=10, pady=10)
+#         self.play_pause_video_button = ctk.CTkButton(
+#             self,
+#             text="",
+#             width=40,
+#             height=40,
+#             command=self.play_pause,
+#             state="disabled",
+#         )
+#         self.play_pause_video_button.pack(anchor="sw", side="left", padx=10, pady=10)
 
-        self.start_time = ctk.CTkLabel(self, text=str(datetime.timedelta(seconds=0)))
-        self.start_time.pack(anchor="sw", side="left", padx=(0, 10), pady=(0, 15))
+#         self.start_time = ctk.CTkLabel(self, text=str(datetime.timedelta(seconds=0)))
+#         self.start_time.pack(anchor="sw", side="left", padx=(0, 10), pady=(0, 15))
 
-        self.progress_value = ctk.IntVar(self)
+#         self.progress_value = ctk.IntVar(self)
 
-        self.progress_slider = ctk.CTkSlider(
-            self,
-            variable=self.progress_value,
-            orientation="horizontal",
-            width=100,
-            from_=-1,
-            to=1,
-            number_of_steps=1,
-            command=self.seek,
-        )
-        self.progress_slider.pack(
-            anchor="sw", side="left", fill="x", expand=1, padx=(0, 10), pady=(0, 21)
-        )
+#         self.progress_slider = ctk.CTkSlider(
+#             self,
+#             variable=self.progress_value,
+#             orientation="horizontal",
+#             width=100,
+#             from_=-1,
+#             to=1,
+#             number_of_steps=1,
+#             command=self.seek,
+#         )
+#         self.progress_slider.pack(
+#             anchor="sw", side="left", fill="x", expand=1, padx=(0, 10), pady=(0, 21)
+#         )
 
-        self.end_time = ctk.CTkLabel(self, text=str(datetime.timedelta(seconds=0)))
-        self.end_time.pack(anchor="sw", side="left", padx=(0, 10), pady=(0, 15))
+#         self.end_time = ctk.CTkLabel(self, text=str(datetime.timedelta(seconds=0)))
+#         self.end_time.pack(anchor="sw", side="left", padx=(0, 10), pady=(0, 15))
 
-        # bind player
-        self.vid_player.bind("<<Duration>>", self.update_duration)
-        self.vid_player.bind("<<SecondChanged>>", self.update_scale)
-        self.vid_player.bind("<<Ended>>", self.video_ended)
+#         # bind player
+#         self.vid_player.bind("<<Duration>>", self.update_duration)
+#         self.vid_player.bind("<<SecondChanged>>", self.update_scale)
+#         self.vid_player.bind("<<Ended>>", self.video_ended)
 
-    def open_video(self):
-        self.play_pause_video_button.configure(state="normal")
-        self.vid_player.stop()
+#     def open_video(self):
+#         self.play_pause_video_button.configure(state="normal")
+#         self.vid_player.stop()
 
-        if self.video_file:
-            # load video
-            self.vid_player.load(self.video_file)
-            self.progress_slider.set(-1)
+#         if self.video_file:
+#             # load video
+#             self.vid_player.load(self.video_file)
+#             self.progress_slider.set(-1)
 
-    def update_duration(self, event):
-        try:
-            duration = int(self.vid_player.video_info()["duration"])
-            self.progress_slider.configure(
-                from_=-1, to=duration, number_of_steps=duration
-            )
-            self.end_time.configure(text=str(datetime.timedelta(seconds=duration)))
-        except:
-            pass
+#     def update_duration(self, event):
+#         try:
+#             duration = int(self.vid_player.video_info()["duration"])
+#             self.progress_slider.configure(
+#                 from_=-1, to=duration, number_of_steps=duration
+#             )
+#             self.end_time.configure(text=str(datetime.timedelta(seconds=duration)))
+#         except:
+#             pass
 
-    def seek(self, value):
-        if self.video_file:
-            try:
-                self.vid_player.seek(int(value))
-                self.vid_player.play()
-                self.vid_player.after(50, self.vid_player.pause)
-                self.play_pause_video_button.configure(text="")
-            except:
-                pass
+#     def seek(self, value):
+#         if self.video_file:
+#             try:
+#                 self.vid_player.seek(int(value))
+#                 self.vid_player.play()
+#                 self.vid_player.after(50, self.vid_player.pause)
+#                 self.play_pause_video_button.configure(text="")
+#             except:
+#                 pass
 
-    def update_scale(self, event):
-        try:
-            self.progress_slider.set(int(self.vid_player.current_duration()))
-            self.start_time.configure(
-                text=str(
-                    datetime.timedelta(
-                        seconds=int(self.vid_player.current_duration() + 1)
-                    )
-                )
-            )
-        except:
-            pass
+#     def update_scale(self, event):
+#         try:
+#             self.progress_slider.set(int(self.vid_player.current_duration()))
+#             self.start_time.configure(
+#                 text=str(
+#                     datetime.timedelta(
+#                         seconds=int(self.vid_player.current_duration() + 1)
+#                     )
+#                 )
+#             )
+#         except:
+#             pass
 
-    def play_pause(self):
-        if self.video_file:
-            if self.vid_player.is_paused():
-                self.vid_player.play()
-                pygame.mixer.music.unpause()
-                self.play_pause_video_button.configure(text="")
+#     def play_pause(self):
+#         if self.video_file:
+#             if self.vid_player.is_paused():
+#                 self.vid_player.play()
+#                 pygame.mixer.music.unpause()
+#                 self.play_pause_video_button.configure(text="")
 
-            else:
-                self.vid_player.pause()
-                pygame.mixer.music.pause()
-                self.play_pause_video_button.configure(text="")
+#             else:
+#                 self.vid_player.pause()
+#                 pygame.mixer.music.pause()
+#                 self.play_pause_video_button.configure(text="")
 
-    def video_ended(self, event):
-        self.play_pause_video_button.configure(text="")
-        self.progress_slider.set(-1)
-        pygame.mixer.music.stop()
+#     def video_ended(self, event):
+#         self.play_pause_video_button.configure(text="")
+#         self.progress_slider.set(-1)
+#         pygame.mixer.music.stop()
 
 
 def prepare(gifs):
@@ -204,7 +204,7 @@ def add_audio(clip, audio_path):
 
 class ThumbnailLabel(ctk.CTkLabel):
     """
-    function to get labels with thumbnails of gif
+    class to get labels with thumbnails of gif
     """
 
     def __init__(self, master, gif, size=(200, 200), *args, **kwargs):

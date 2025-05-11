@@ -130,67 +130,67 @@ class AudioDropWindow(TkinterDnD.Tk):
         self.destroy()
 
 
-class GifDropWindow(TkinterDnD.Tk):
-    def __init__(self, beat_times, total_gifs):
-        super().__init__()
-        self.title("Import GIF files")
-        self.geometry("500x800")
-        self.gif_paths = []
-        self.beat_times = beat_times
+# class GifDropWindow(TkinterDnD.Tk):
+#     def __init__(self, beat_times, total_gifs):
+#         super().__init__()
+#         self.title("Import GIF files")
+#         self.geometry("500x800")
+#         self.gif_paths = []
+#         self.beat_times = beat_times
 
-        # -- frames --
-        self.frame_1 = ctk.CTkFrame(self)
-        self.frame_1.pack(expand=1, fill="both", padx=30, pady=30)
+#         # -- frames --
+#         self.frame_1 = ctk.CTkFrame(self)
+#         self.frame_1.pack(expand=1, fill="both", padx=30, pady=30)
 
-        self.outline = ctk.CTkFrame(
-            self.frame_1, border_width=3, fg_color="transparent"
-        )
-        self.outline.pack(expand=1, fill="both", padx=30, pady=(30, 10))
+#         self.outline = ctk.CTkFrame(
+#             self.frame_1, border_width=3, fg_color="transparent"
+#         )
+#         self.outline.pack(expand=1, fill="both", padx=30, pady=(30, 10))
 
-        # init outline frame as drop target for dnd
-        self.outline.drop_target_register(DND_FILES)
-        self.outline.dnd_bind("<<Drop>>", self.drop_event)
+#         # init outline frame as drop target for dnd
+#         self.outline.drop_target_register(DND_FILES)
+#         self.outline.dnd_bind("<<Drop>>", self.drop_event)
 
-        # -- buttons --
-        self.audio_file_button = ctk.CTkButton(
-            self.frame_1, text="Or select files", command=self.click_event
-        )
-        self.audio_file_button.pack(fill="x", padx=30, pady=(0, 30))
+#         # -- buttons --
+#         self.audio_file_button = ctk.CTkButton(
+#             self.frame_1, text="Or select files", command=self.click_event
+#         )
+#         self.audio_file_button.pack(fill="x", padx=30, pady=(0, 30))
 
-        self.confirm_button = ctk.CTkButton(
-            self, text="Roll with those", command=self.destroy
-        )
+#         self.confirm_button = ctk.CTkButton(
+#             self, text="Roll with those", command=self.destroy
+#         )
 
-        # -- labels --
-        self.drop_label = ctk.CTkLabel(
-            self.outline,
-            text=f"Drop your GIF files here\nTotal GIFs needed: {total_gifs}",
-        )
-        self.drop_label.pack(expand=1)
+#         # -- labels --
+#         self.drop_label = ctk.CTkLabel(
+#             self.outline,
+#             text=f"Drop your GIF files here\nTotal GIFs needed: {total_gifs}",
+#         )
+#         self.drop_label.pack(expand=1)
 
-    def click_event(self):
-        self.gif_paths = filedialog.askopenfilenames()
+#     def click_event(self):
+#         self.gif_paths = filedialog.askopenfilenames()
 
-        for path in self.gif_paths:
-            ctk.CTkLabel(self.frame_1, text=path).pack()
-        self.confirm_button.pack()
+#         for path in self.gif_paths:
+#             ctk.CTkLabel(self.frame_1, text=path).pack()
+#         self.confirm_button.pack()
 
-    def drop_event(self, event):
-        # handling file preparation cause dnd formats them weirdly
-        files = self.tk.splitlist(event.data)
-        new_paths = [f.strip("{}") for f in files]
+#     def drop_event(self, event):
+#         # handling file preparation cause dnd formats them weirdly
+#         files = self.tk.splitlist(event.data)
+#         new_paths = [f.strip("{}") for f in files]
 
-        self.gif_paths.extend(new_paths)
+#         self.gif_paths.extend(new_paths)
 
-        for path in self.gif_paths:
-            ctk.CTkLabel(self.frame_1, text=path).pack()
-            print(path)  # debug printing
-        self.confirm_button.pack()
+#         for path in self.gif_paths:
+#             ctk.CTkLabel(self.frame_1, text=path).pack()
+#             print(path)  # debug printing
+#         self.confirm_button.pack()
 
 
 class App(ctk.CTk):
     def __init__(
-        self, tempo, beat_times, beat_intervals, gifs: list, audio_path, duration
+        self, tempo, beat_times, beat_intervals, audio_path, duration
     ):
         super().__init__()
         self.attributes("-zoomed", True)
@@ -201,7 +201,7 @@ class App(ctk.CTk):
         self.beat_intervals = beat_intervals
         self.number_of_intervals = len(beat_intervals)
         self.audio_path = audio_path
-        self.gifs = gifs
+        self.gifs = []
         self.duration = duration
 
         # init pygame mixer
@@ -224,11 +224,21 @@ class App(ctk.CTk):
 
         self.fx_frame = ctk.CTkFrame(self.left_frame)
         self.fx_frame.pack_propagate(False)
-        self.fx_frame.pack(side="left", padx=(30, 5), pady=(5, 30), fill="both", expand=1)
+        self.fx_frame.pack(
+            side="left", padx=(30, 5), pady=(5, 30), fill="both", expand=1
+        )
 
         self.gif_frame = ctk.CTkFrame(self.left_frame)
         self.gif_frame.pack_propagate(False)
-        self.gif_frame.pack(side="left", padx=(5, 5), pady=(5, 30), fill="both", expand=1)
+        self.gif_frame.pack(
+            side="left", padx=(5, 5), pady=(5, 30), fill="both", expand=1
+        )
+
+        # -- gif import button --
+        self.gif_import_button = ctk.CTkButton(
+            self.video_frame, text="Import your GIFs", command=self.choose_gifs
+        )
+        self.gif_import_button.pack()
 
         # load patterns
         with open("options/patterns.json", "r", encoding="utf-8") as f:
@@ -238,22 +248,12 @@ class App(ctk.CTk):
             self.music_frame, fg_color="transparent", orientation="horizontal"
         )
 
-        # -- video player --
         self.generate_button = ctk.CTkButton(
-            self.video_frame,
+            self.music_frame,
             text="Generate Video",
             command=self.generate_button_click,
         )
         self.generate_button.pack(fill="x", padx=10, pady=10)
-
-        self.vid_player = video.VideoPlayer(
-            self.video_frame,
-            self.gifs,
-            self.beat_intervals,
-            self.audio_path,
-            self.duration,
-        )
-        self.vid_player.pack(expand=1, fill="both")
 
         # -- music player --
         self.music_player_container = ctk.CTkFrame(self.music_frame)
@@ -274,14 +274,14 @@ class App(ctk.CTk):
         self.thumb_label = ctk.CTkLabel(
             self.pair_frame, text="All Clips", width=160, height=160
         )
-        self.thumb_label.pack(side="top", pady=(0,5))
+        self.thumb_label.pack(side="top", pady=(0, 5))
 
         self.all_beatskip_dropdown = ctk.CTkOptionMenu(
             self.pair_frame,
             values=[str(i) for i in range(len(self.beat_intervals))],
             command=self.set_all_durations,
         )
-        self.all_beatskip_dropdown.pack(side="top", pady=(0,5), padx=5)
+        self.all_beatskip_dropdown.pack(side="top", pady=(0, 5), padx=5)
 
         # options dropdown for more variations
         self.pair_frame = ctk.CTkFrame(self.skip_beat_frame, corner_radius=0)
@@ -290,82 +290,100 @@ class App(ctk.CTk):
         self.thumb_label = ctk.CTkLabel(
             self.pair_frame, text="Cool options", width=160, height=160
         )
-        self.thumb_label.pack(side="top", pady=(0,5))
+        self.thumb_label.pack(side="top", pady=(0, 5))
 
         self.patterns_beatskip_dropdown = ctk.CTkOptionMenu(
             self.pair_frame,
             values=list(self.data),
             command=self.set_patterns,
         )
-        self.patterns_beatskip_dropdown.pack(side="left", anchor="n", padx=5, pady=(0,5))
+        self.patterns_beatskip_dropdown.pack(
+            side="left", anchor="n", padx=5, pady=(0, 5)
+        )
 
         # save pattern button
-        self.save_pattern_button = ctk.CTkButton(self.pair_frame, text="Save pattern", command=self.get_save_pattern_name, width=70)
-        self.save_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
+        self.save_pattern_button = ctk.CTkButton(
+            self.pair_frame,
+            text="Save pattern",
+            command=self.get_save_pattern_name,
+            width=70,
+        )
+        self.save_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0, 5))
 
-        self.delete_pattern_button = ctk.CTkButton(self.pair_frame, text="Delete pattern", command=self.delete_pattern, width=70)
-        self.delete_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
-
+        self.delete_pattern_button = ctk.CTkButton(
+            self.pair_frame,
+            text="Delete pattern",
+            command=self.delete_pattern,
+            width=70,
+        )
+        self.delete_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0, 5))
 
         # entry for pattern name
-        self.pattern_name_entry = ctk.CTkEntry(self.pair_frame, placeholder_text="Name of the pattern")
+        self.pattern_name_entry = ctk.CTkEntry(
+            self.pair_frame, placeholder_text="Name of the pattern"
+        )
 
         # second button for final save
-        self.final_save_button = ctk.CTkButton(self.pair_frame, text="Save!", command=self.save_pattern)
+        self.final_save_button = ctk.CTkButton(
+            self.pair_frame, text="Save!", command=self.save_pattern
+        )
 
+        # initial load
+        self.hot_load(self.gifs)
+
+
+    def hot_load(self, gifs):
         # create pairs of thumbnail and dropdown
-        for gif in self.gifs:
+        for gif in gifs:
             self.pair_frame = ctk.CTkFrame(self.skip_beat_frame, corner_radius=0)
-            self.pair_frame.pack(
-                side="left", padx=5, pady=(0, 5), fill="both"
-            )
+            self.pair_frame.pack(side="left", padx=5, pady=(0, 5), fill="both")
 
             self.thumb_label = video.ThumbnailLabel(
                 self.pair_frame, gif, size=(160, 160)
             )
-            self.thumb_label.pack(side="top", pady=(0,5))
+            self.thumb_label.pack(side="top", pady=(0, 5))
 
             self.beatskip_dropdown = ctk.CTkOptionMenu(
                 self.pair_frame,
                 values=[str(i) for i in range(len(self.beat_intervals))],
             )
-            self.beatskip_dropdown.pack(side="top", pady=(0,5), padx=5)
+            self.beatskip_dropdown.pack(side="top", pady=(0, 5), padx=5)
+
+    def choose_gifs(self):
+        gif_paths = filedialog.askopenfilenames()
+        
+        if gif_paths:
+            self.gifs.extend(gif_paths)
+            self.hot_load(gif_paths)
+        else:
+            pass
 
     def generate_button_click(self):
         # 1. ask for filename
         file_path = filedialog.asksaveasfilename(
-            defaultextension=".mp4",
-            filetypes=[("MP4", "*.mp4")])
+            defaultextension=".mp4", filetypes=[("MP4", "*.mp4")]
+        )
         if not file_path:
             return
 
         # 2. deactivate button and start new thread for generation
         self.generate_button.configure(state="disabled")
-        threading.Thread(
-            target=self.generate,
-            args=(file_path,),
-            daemon=True
-        ).start()
+        threading.Thread(target=self.generate, args=(file_path,), daemon=True).start()
 
     def generate(self, file_path):
         # 3. generate video
         clips = video.prepare(self.gifs)
         concatenated = video.concat_clips(
-            clips,
-            self.beat_intervals,
-            self.duration,
-            self.generate_clip_durations()
+            clips, self.beat_intervals, self.duration, self.generate_clip_durations()
         )
         final_video = video.add_audio(concatenated, self.audio_path)
         final_video.write_videofile(file_path)
 
-        # 4. set instance attribute and open video player
+        # 4. set button to normal
         def on_done():
-            self.vid_player.video_file = file_path
-            self.vid_player.open_video()
             self.generate_button.configure(state="normal")
-        self.after(0, on_done)
 
+        self.after(0, on_done)
 
     def generate_clip_durations(self):
         """This function isn't for setting values in dropdowns, it puts the values in a list for generation"""
@@ -431,11 +449,10 @@ class App(ctk.CTk):
         self.save_pattern_button.pack_forget()
         self.patterns_beatskip_dropdown.pack_forget()
         self.delete_pattern_button.pack_forget()
-        
+
         # show entry for name
-        self.pattern_name_entry.pack(side="left", anchor="n", padx=5, pady=(0,5))
-        self.final_save_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
-        
+        self.pattern_name_entry.pack(side="left", anchor="n", padx=5, pady=(0, 5))
+        self.final_save_button.pack(side="left", anchor="n", padx=5, pady=(0, 5))
 
     def save_pattern(self):
         # generate and save pattern
@@ -456,7 +473,6 @@ class App(ctk.CTk):
         with open("options/patterns.json", "w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False, indent=4)
 
-
         # update dropdown
         current_values = list(self.patterns_beatskip_dropdown.cget("values"))
         current_values.append(name)
@@ -468,16 +484,20 @@ class App(ctk.CTk):
         self.final_save_button.pack_forget()
 
         # show dropdown and initial save button
-        self.patterns_beatskip_dropdown.pack(side="left", anchor="n", padx=5, pady=(0,5))
-        self.save_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
-        self.delete_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0,5))
+        self.patterns_beatskip_dropdown.pack(
+            side="left", anchor="n", padx=5, pady=(0, 5)
+        )
+        self.save_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0, 5))
+        self.delete_pattern_button.pack(side="left", anchor="n", padx=5, pady=(0, 5))
 
         # set dropdown to saved pattern
         self.patterns_beatskip_dropdown.set(name)
-        
+
         # show message that it saved for 1 sec
         self.save_pattern_button.configure(text="Saved!")
-        self.save_pattern_button.after(1000, lambda: self.save_pattern_button.configure(text="Save pattern"))
+        self.save_pattern_button.after(
+            1000, lambda: self.save_pattern_button.configure(text="Save pattern")
+        )
 
     def delete_pattern(self):
         # get pattern to delete
@@ -494,14 +514,14 @@ class App(ctk.CTk):
         current_values.append(name)
         self.patterns_beatskip_dropdown.configure(values=current_values)
 
-         # set dropdown to default pattern
+        # set dropdown to default pattern
         self.patterns_beatskip_dropdown.set("default")
 
         # update button text
         self.delete_pattern_button.configure(text="Deleted!")
-        self.delete_pattern_button.after(1000, lambda: self.delete_pattern_button.configure(text="Delete pattern"))
-
-
+        self.delete_pattern_button.after(
+            1000, lambda: self.delete_pattern_button.configure(text="Delete pattern")
+        )
 
 
 def main():
@@ -514,11 +534,11 @@ def main():
     duration = audio_window.duration
     total_gifs = audio_window.total_gifs
 
-    gif_window = GifDropWindow(beat_times, total_gifs)
-    gif_window.mainloop()
-    gifs = gif_window.gif_paths
+    # gif_window = GifDropWindow(beat_times, total_gifs)
+    # gif_window.mainloop()
+    # gifs = gif_window.gif_paths
 
-    main_window = App(tempo, beat_times, beat_intervals, gifs, audio_path, duration)
+    main_window = App(tempo, beat_times, beat_intervals, audio_path, duration)
     main_window.mainloop()
 
     # main_window = App(3, [], [2, 3, 54, 6], clips_path, "test_song.wav", 10)
