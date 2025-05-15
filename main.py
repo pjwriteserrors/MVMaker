@@ -247,11 +247,6 @@ class App(ctk.CTk):
         )
         self.generate_button.pack(fill="x", padx=10, pady=10)
 
-        self.pinterest_random_gifs_button = ctk.CTkButton(
-            self.video_frame, text="Feelin' Lucky", command=self.get_pinterest_gifs
-        )
-        self.pinterest_random_gifs_button.pack()
-
         # load patterns
         with open("options/patterns.json", "r", encoding="utf-8") as f:
             self.data = json.load(f)
@@ -360,10 +355,6 @@ class App(ctk.CTk):
         else:
             pass
 
-    def get_pinterest_gifs(self):
-        
-
-        self.hot_load(paths)
 
     def generate_button_click(self):
         # 1. ask for filename

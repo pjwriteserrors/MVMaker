@@ -8,7 +8,7 @@ A tool that automates the making of music videos
 - [x] add new "settings" frame for all beatskips, patterns and preset musicpy effects
 <br />
 
-- [ ] list gif files in a scrollable frame in dropdown window
+- [ ] list gif files in a scrollable frame
 - [ ] numbered + delete button to remove from list
 <br />
 
@@ -31,3 +31,4 @@ A tool that automates the making of music videos
 - [ ] pinterest gif downloader
 - [ ] youtube video downloader
 - [ ] video detect cuts and make clips
+- [ ] files option on the top for import
